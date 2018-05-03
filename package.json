@@ -1,0 +1,21 @@
+{
+  "name": "discovery-mechanisms",
+  "version": "1.0.0",
+  "description": "A Peer Discovery module enables libp2p to find peers to connect to. Think of these mechanisms as ways to join the rest of the network, as railing points.",
+  "main": "1.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "libp2p": "^0.20.2",
+    "libp2p-kad-dht": "^0.10.0",
+    "libp2p-mdns": "^0.11.0",
+    "libp2p-mplex": "^0.7.0",
+    "libp2p-railing": "^0.8.1",
+    "libp2p-secio": "^0.10.0",
+    "libp2p-spdy": "^0.12.1",
+    "libp2p-tcp": "^0.12.0"
+  }
+}
