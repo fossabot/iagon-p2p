@@ -7,12 +7,14 @@ const SECIO = require('libp2p-secio')
 const PeerInfo = require('peer-info')
 const CID = require('cids')
 const KadDHT = require('libp2p-kad-dht')
+const Railing = require('libp2p-railing')
 
 const waterfall = require('async/waterfall')
 const parallel = require('async/parallel')
 
+
 class MyBundle extends libp2p {
-  constructor (peerInfo) {
+  constructor(peerInfo) {
     const modules = {
       transport: [new TCP()],
       connection: {
@@ -26,13 +28,14 @@ class MyBundle extends libp2p {
   }
 }
 
-function createNode (callback) {
+function createNode(callback) {
   let node
 
   waterfall([
     (cb) => PeerInfo.create(cb),
     (peerInfo, cb) => {
       peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/0')
+      peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/10333')
       node = new MyBundle(peerInfo)
       node.start(cb)
     }
@@ -41,38 +44,22 @@ function createNode (callback) {
 
 parallel([
   (cb) => createNode(cb),
-  (cb) => createNode(cb),
-  (cb) => createNode(cb)
 ], (err, nodes) => {
-  if (err) { throw err }
+  if (err) {
+    throw err
+  }
 
   const node1 = nodes[0]
-  const node2 = nodes[1]
-  const node3 = nodes[2]
   console.log(node1.peerInfo.id.toB58String())
-  console.log(node3.peerInfo.id.toB58String())
-  console.log(node2.peerInfo.id.toB58String())
-  parallel([
-    (cb) => node1.dial(node2.peerInfo, cb),
-    (cb) => node2.dial(node3.peerInfo, cb),
-    // Set up of the cons might take time
-    (cb) => setTimeout(cb, 300)
-  ], (err) => {
-    if (err) { throw err }
 
-    const cid = new CID('QmNxd9G9Bhi3hJnyH5iZdouRsswFxnBwT939MDjq3AapEY')
+  const cid = new CID('QmNxd9G9Bhi3hJnyH5iZdouRsswFxnBwT939MDjq3AapEY')
 
 
-    node1.contentRouting.provide(cid, (err) => {
-      if (err) { throw err }
-
-      console.log('Node %s is providing %s', node1.peerInfo.id.toB58String(), cid.toBaseEncodedString())
-
-      node3.contentRouting.findProviders(cid, 5000, (err, providers) => {
-        if (err) { throw err }
-
-        console.log('Found provider:', providers[0].id.toB58String())
-      })
-    })
+  node1.contentRouting.findProviders(cid, 5000, (err, providers) => {
+    if (err) {
+      throw err
+    }
+    console.log(providers)
+    // console.log('Found provider:', providers[0].id.toB58String())
   })
 })
