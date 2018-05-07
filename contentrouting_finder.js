@@ -12,7 +12,9 @@ const Railing = require('libp2p-railing')
 const waterfall = require('async/waterfall')
 const parallel = require('async/parallel')
 
-
+const bootstrapers = [
+  '/ip4/52.207.244.0/tcp/10333/'
+]
 class MyBundle extends libp2p {
   constructor(peerInfo) {
     const modules = {
@@ -22,7 +24,8 @@ class MyBundle extends libp2p {
         crypto: [SECIO]
       },
       // we add the DHT module that will enable Peer and Content Routing
-      DHT: KadDHT
+      DHT: KadDHT,
+      // discovery: [new Railing(bootstrapers)]
     }
     super(modules, peerInfo)
   }
@@ -35,7 +38,7 @@ function createNode(callback) {
     (cb) => PeerInfo.create(cb),
     (peerInfo, cb) => {
       peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/0')
-      peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/10333')
+      peerInfo.multiaddrs.add('/ip4/52.207.244.0/tcp/10333')
       node = new MyBundle(peerInfo)
       node.start(cb)
     }
