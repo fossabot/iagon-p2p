@@ -49,6 +49,7 @@ class Node extends libp2p {
         muxer: getMuxers(options.muxer),
         crypto: [ secio ]
       },
+      DHT: KadDHT,
       discovery: []
     }
 

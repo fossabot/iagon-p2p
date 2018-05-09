@@ -46,9 +46,13 @@ async.parallel([
   // const peerDialer = new PeerInfo(ids[0])
   // peerDialer.multiaddrs.add('/ip4/0.0.0.0/tcp/0')
   // const nodeDialer = new Node(peerDialer)
-  const nodeDialer = ids[0]
-  console.log(ids[0].peerInfo.id.toB58String())
+  // const nodeDialer = ids[0]
+  // console.log(ids[0].peerInfo.id.toB58String())
 
+  const dialerNode = ids[0]
+  const dialerId = dialerNode.peerInfo.id
+  const dialerPeerInfo = dialerNode.peerInfo
+  
   const peerListener = new PeerInfo(ids[1])
   idListener = ids[1]
   peerListener.multiaddrs.add('/ip4/127.0.0.1/tcp/10333')
