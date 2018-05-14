@@ -72,7 +72,7 @@ async.parallel([
 
         const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL')
         // QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm
-        setTimeout(nodeDialer.contentRouting.findProviders(cid, 5000, (err, providers) => {
+        nodeDialer.contentRouting.findProviders(cid, 5000, (err, providers) => {
             if (err) {
                 throw err
             }
@@ -81,7 +81,7 @@ async.parallel([
                 console.log('Found provider:', providers)
             }
 
-        }), 6000)
+        })
 
 
         // nodeDialer.dial(peerListener, (err, cb) => {

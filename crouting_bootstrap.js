@@ -17,20 +17,21 @@ const waterfall = require('async/waterfall')
 const parallel = require('async/parallel')
 
 class MyBundle extends libp2p {
-    constructor (peerInfo) {
-      const modules = {
-        transport: [new TCP(),
-            new WS()],
-        connection: {
-          muxer: [Mplex],
-          crypto: [SECIO]
-        },
-        // we add the DHT module that will enable Peer and Content Routing
-        DHT: KadDHT
-      }
-      super(modules, peerInfo)
+    constructor(peerInfo) {
+        const modules = {
+            transport: [new TCP(),
+                new WS()
+            ],
+            connection: {
+                muxer: [Mplex],
+                crypto: [SECIO]
+            },
+            // we add the DHT module that will enable Peer and Content Routing
+            DHT: KadDHT
+        }
+        super(modules, peerInfo)
     }
-  }
+}
 
 PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
     if (err) {
@@ -38,6 +39,7 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
     }
     const peerListener = new PeerInfo(idListener)
     peerListener.multiaddrs.add('/ip4/0.0.0.0/tcp/10333')
+    peerListener.multiaddrs.add('/ip4/0.0.0.0/tcp/10334/ws')
     const nodeListener = new MyBundle(peerListener)
 
     nodeListener.start((err) => {
@@ -51,15 +53,19 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
 
         nodeListener.handle('/a-protocol', (protocol, conn) => {
             pull(
-              conn,
-              pull.map((v) => v.toString()),
-              pull.log()
+                conn,
+                pull.map((v) => v.toString()),
+                pull.log()
             )
-          })
+        })
 
-        const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL')
+        // const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL')
+        var mh = require('multihashes')
+        var address = mh.toB58String(mh.encode(new Buffer('hey, how is it going'), 'sha2-256'))
 
-        
+        console.log(address)
+        const cid = new CID(address)
+
         nodeListener.contentRouting.provide(cid, (err) => {
             if (err) {
                 throw err
@@ -74,7 +80,6 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
             //         // console.log('Found provider:', providers[0].id.toB58String())
             //         console.log('Found provider:', providers)
             //     }
-
             // })
         })
 
