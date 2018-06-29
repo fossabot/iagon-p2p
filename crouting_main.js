@@ -19,6 +19,8 @@ const multibase = require('multibase')
 const bootstrapers = [
     '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm'
 ]
+// const multihashFile = require('./dist/Multihash')
+const ipfs = require('ipfs')
 
 class MyBundle extends libp2p {
     constructor(peerInfo) {
@@ -90,24 +92,49 @@ waterfall([
         //     console.log(content)
 
         // })
-        var mh = require('multihashes')
-        var address = mh.toB58String(mh.encode(new Buffer('hey, how is it going'), 'sha2-256'))
+        // multihashFile.MultiHash(new Buffer('hey, how is it going')).then((mhash) => {
+        //     console.log(mhash)
+        // }).then((err) => {
+        //     console.log(mhash)
 
-        console.log(address)
-        const cid = new CID(address)
-        // const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL')
-        setTimeout(() => {
-            node.contentRouting.findProviders(cid, 5000, (err, providers) => {
-                if (err) {
-                    throw err
-                }
-                if (providers.length != 0) {
-                    // console.log('Found provider:', providers[0].id.toB58String())
-                    console.log('Found provider:', providers)
-                }
+        // })
 
-            })
-        }, 1000)
+        // multihashFile.MultiHash.getMultiHash(new Buffer('hey, how is it going')).then((mhash) => {
+        //     console.log(mhash)
+        // }).then((err) => {
+        //     console.log(mhash)
+
+        // })
+
+        // multihashFile.getName()
+        // ipfs.files.add(new Buffer('hey, how is it going'), {
+        //     onlyHash: true
+        // }, (err, providers) => {
+        //     if (err) {
+        //         throw err
+        //     }
+        //     console.log(providers)
+        // })
+
+        // var mh = require('multihashes')
+        // var address = mh.toB58String(mh.encode(new Buffer('hey, how is it going'), 'sha2-256'))
+
+
+        // console.log(address)
+        // const cid = new CID(address)
+        // // const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL')
+        // setTimeout(() => {
+        //     node.contentRouting.findProviders(cid, 5000, (err, providers) => {
+        //         if (err) {
+        //             throw err
+        //         }
+        //         if (providers.length != 0) {
+        //             // console.log('Found provider:', providers[0].id.toB58String())
+        //             console.log('Found provider:', providers)
+        //         }
+
+        //     })
+        // }, 1000)
 
 
     })

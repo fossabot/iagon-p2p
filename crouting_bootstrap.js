@@ -60,11 +60,12 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
         })
 
         // const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL')
-        var mh = require('multihashes')
-        var address = mh.toB58String(mh.encode(new Buffer('hey, how is it going'), 'sha2-256'))
+        // var mh = require('multihashes')
+        // var address = mh.toB58String(mh.encode(new Buffer('hey, how is it going'), 'sha2-256'))
 
-        console.log(address)
-        const cid = new CID(address)
+        // console.log(address)
+        // const cid = new CID(address)
+        const cid = new CID("QmXGXccwT97aYp11PE3sGxDDmABWTDER1hn32dJauRSvfw")
 
         nodeListener.contentRouting.provide(cid, (err) => {
             if (err) {
@@ -72,15 +73,15 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
             }
             console.log('Node %s is providing %s', nodeListener.peerInfo.id.toB58String(), cid.toBaseEncodedString())
 
-            // nodeListener.contentRouting.findProviders(cid, 5000, (err, providers) => {
-            //     if (err) {
-            //         throw err
-            //     }
-            //     if (providers) {
-            //         // console.log('Found provider:', providers[0].id.toB58String())
-            //         console.log('Found provider:', providers)
-            //     }
-            // })
+            nodeListener.contentRouting.findProviders(cid, 5000, (err, providers) => {
+                if (err) {
+                    throw err
+                }
+                if (providers) {
+                    // console.log('Found provider:', providers[0].id.toB58String())
+                    console.log('Found provider:', providers)
+                }
+            })
         })
 
         console.log('Listener ready, listening on:')
