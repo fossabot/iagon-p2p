@@ -16,7 +16,9 @@ const MulticastDNS = require('libp2p-mdns')
 const bootstrapers = [
     '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm'
 ]
-
+const pull = require('pull-stream')
+const Pushable = require('pull-pushable')
+const p = Pushable()
 class MyBundle extends libp2p {
     constructor(_options) {
         const defaults = {
