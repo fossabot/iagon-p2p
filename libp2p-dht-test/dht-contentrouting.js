@@ -65,8 +65,8 @@ function createNode(callback) {
     waterfall([
         (cb) => PeerInfo.create(cb),
         (peerInfo, cb) => {
-            peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/0')
-            peerInfo.multiaddrs.add('/ip4/127.0.0.1/tcp/0/ws')
+            peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/10335')
+            peerInfo.multiaddrs.add('/ip4/127.0.0.1/tcp/10336/ws')
             // const ma = `/dns4/star-signal.cloud.ipfs.team/tcp/443/wss/p2p-webrtc-star/ipfs/${peerIdStr}`
             // peerInfo.multiaddrs.add(ma)
             node = new MyBundle({
