@@ -79,6 +79,13 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
         // node.switch.on('peer-mux-established', (peerInfo) => {
         //     console.log(peerInfo.id.toB58String())
         // })
+        node.on('peer:discovery', (peer) => {
+            // console.log('Discovered:', peer.id.toB58String())
+            node.dial(peer, () => {})
+        })
+        node.on('peer:connect', (peer) => {
+            console.log('Connected to peer:', peer.id.toB58String())
+        })
 
         node.handle('/dht-protocol', (protocol, conn) => {
             pull(pull.values(['Request received. Hello there']), conn)
@@ -98,7 +105,7 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
 
         // console.log(address)
         // const cid = new CID(address)
-        const cid = new CID("QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL")
+        const cid = new CID("QmXGXccwT97aYp11PE3sGxDDmABWTDER1hn32dJauRSvfw")
 
         node.contentRouting.provide(cid, (err) => {
             if (err) {
@@ -147,7 +154,7 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
 
         console.log('Listener ready, listening on:')
         peerListener.multiaddrs.forEach((ma) => {
-            console.log(ma.toString() + '/ipfs/' + idListener.toB58String())
+            console.log(ma.toString())
         })
     })
 })

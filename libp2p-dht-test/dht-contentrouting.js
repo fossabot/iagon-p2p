@@ -14,7 +14,12 @@ const Bootstrap = require('libp2p-railing')
 const WS = require('libp2p-websockets')
 const MulticastDNS = require('libp2p-mdns')
 const bootstrapers = [
-    '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm'
+    '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm',
+    '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
+    '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
+    '/ip4/104.236.179.241/tcp/4001/ipfs/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM',
+    '/ip4/162.243.248.213/tcp/4001/ipfs/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm',
+    '/ip4/128.199.219.111/tcp/4001/ipfs/QmSoLSafTMBsPKadTEgaXctDQVcqN88CNLHXMkTNwMKPnu',
 ]
 const pull = require('pull-stream')
 const Pushable = require('pull-pushable')
@@ -107,9 +112,6 @@ createNode((err, node) => {
     })
     node.on('peer:connect', (peer) => {
         console.log('Connected to peer:', peer.id.toB58String())
-
-
-
 
         // console.log('Connection established to:', peer.id.toB58String())
     })
