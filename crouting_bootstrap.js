@@ -98,7 +98,7 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
 
         // console.log(address)
         // const cid = new CID(address)
-        const cid = new CID("QmXGXccwT97aYp11PE3sGxDDmABWTDER1hn32dJauRSvfw")
+        const cid = new CID("QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL")
 
         node.contentRouting.provide(cid, (err) => {
             if (err) {

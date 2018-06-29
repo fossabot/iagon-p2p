@@ -87,7 +87,7 @@ createNode((err, node) => {
     // console.log(node)
     console.log('Listener ready, listening on:')
     node.peerInfo.multiaddrs.forEach((ma) => {
-        console.log(ma.toString() + '/ipfs/' + listenerId.toB58String())
+        console.log(ma.toString() + '/ipfs/' + node.peerInfo.id.toB58String())
     })
     node.on('peer:discovery', (peer) => {
         // console.log('Discovered:', peer.id.toB58String())
@@ -127,27 +127,29 @@ createNode((err, node) => {
                 if (err) {
                     throw err
                 }
+                console.log("waiting")
                 if (providers.length != 0) {
                     providers.forEach(provider => {
-                        if (provider.id.toB58String() !== node.peerInfo.id.toB58String())
+                        if (provider.id.toB58String() !== node.peerInfo.id.toB58String()) {
                             console.log('Found provider:', provider.id.toB58String())
-                        node.dialProtocol(provider, '/dht-protocol', (err, conn) => {
-                            if (err) {
-                                return console.log(err)
-                            }
-                            console.log('nodeA dialed to nodeB on protocol')
+                            node.dialProtocol(provider, '/dht-protocol', (err, conn) => {
+                                if (err) {
+                                    return console.log(err)
+                                }
+                                console.log('nodeA dialed to nodeB on protocol')
 
-                            pull(pull.values(['This information is sent out encrypted to the other peer']), conn)
+                                pull(pull.values(['This information is sent out encrypted to the other peer']), conn)
 
-                            // Sink, data converted from buffer to utf8 string
-                            pull(
-                                conn,
-                                pull.map((data) => {
-                                    return data.toString('utf8').replace('\n', '')
-                                }),
-                                pull.drain(console.log)
-                            )
-                        })
+                                // Sink, data converted from buffer to utf8 string
+                                pull(
+                                    conn,
+                                    pull.map((data) => {
+                                        return data.toString('utf8').replace('\n', '')
+                                    }),
+                                    pull.drain(console.log)
+                                )
+                            })
+                        }
                     });
                 }
 
