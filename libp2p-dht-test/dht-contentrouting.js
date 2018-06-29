@@ -13,6 +13,8 @@ const parallel = require('async/parallel')
 const Bootstrap = require('libp2p-railing')
 const WS = require('libp2p-websockets')
 const MulticastDNS = require('libp2p-mdns')
+const SPDY = require('libp2p-spdy')
+
 const bootstrapers = [
     '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm',
     '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
@@ -31,7 +33,7 @@ class MyBundle extends libp2p {
                 transport: [TCP,
                     new WS()
                 ],
-                streamMuxer: [Mplex],
+                streamMuxer: [SPDY, Mplex],
                 connEncryption: [SECIO],
                 peerDiscovery: [Bootstrap, MulticastDNS],
                 // we add the DHT module that will enable Peer and Content Routing
@@ -54,7 +56,14 @@ class MyBundle extends libp2p {
                         enabled: true,
                         list: bootstrapers
                     }
-                }
+                },
+                relay: {                      // Circuit Relay options
+                    enabled: true,
+                    hop: {
+                      enabled: true,
+                      active: true
+                    }
+                  }
             }
         }
 
@@ -129,7 +138,7 @@ createNode((err, node) => {
                 if (err) {
                     throw err
                 }
-                console.log("waiting")
+                console.log("No providers.")
                 if (providers.length != 0) {
                     providers.forEach(provider => {
                         if (provider.id.toB58String() !== node.peerInfo.id.toB58String()) {
