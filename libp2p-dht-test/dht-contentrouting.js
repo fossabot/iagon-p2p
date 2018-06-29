@@ -66,7 +66,9 @@ function createNode(callback) {
         (cb) => PeerInfo.create(cb),
         (peerInfo, cb) => {
             peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/0')
-            peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/0/ws')
+            peerInfo.multiaddrs.add('/ip4/127.0.0.1/tcp/0/ws')
+            // const ma = `/dns4/star-signal.cloud.ipfs.team/tcp/443/wss/p2p-webrtc-star/ipfs/${peerIdStr}`
+            // peerInfo.multiaddrs.add(ma)
             node = new MyBundle({
                 peerInfo
             })
@@ -83,43 +85,31 @@ createNode((err, node) => {
         return console.log(err)
     }
     // console.log(node)
+    console.log('Listener ready, listening on:')
+    node.peerInfo.multiaddrs.forEach((ma) => {
+        console.log(ma.toString() + '/ipfs/' + listenerId.toB58String())
+    })
     node.on('peer:discovery', (peer) => {
         // console.log('Discovered:', peer.id.toB58String())
         node.dial(peer, () => {})
     })
 
+    node.handle('/dht-protocol', (protocol, conn) => {
+        pull(pull.values(['Request received. Hello there']), conn)
+
+        pull(
+            conn,
+            pull.map((data) => {
+                return data.toString('utf8').replace('\n', '')
+            }),
+            pull.drain(console.log)
+        )
+    })
     node.on('peer:connect', (peer) => {
         console.log('Connected to peer:', peer.id.toB58String())
 
-        node.handle('/dht-protocol', (protocol, conn) => {
-            pull(pull.values(['Request received. Hello there']), conn)
 
-            pull(
-                conn,
-                pull.map((data) => {
-                    return data.toString('utf8').replace('\n', '')
-                }),
-                pull.drain(console.log)
-            )
-        })
 
-        node.dialProtocol(peer, '/dht-protocol', (err, conn) => {
-            if (err) {
-                return console.log(err)
-            }
-            console.log('nodeA dialed to nodeB on protocol')
-
-            pull(pull.values(['This information is sent out encrypted to the other peer']), conn)
-
-            // Sink, data converted from buffer to utf8 string
-            pull(
-                conn,
-                pull.map((data) => {
-                    return data.toString('utf8').replace('\n', '')
-                }),
-                pull.drain(console.log)
-            )
-        })
 
         // console.log('Connection established to:', peer.id.toB58String())
     })
@@ -141,6 +131,23 @@ createNode((err, node) => {
                     providers.forEach(provider => {
                         if (provider.id.toB58String() !== node.peerInfo.id.toB58String())
                             console.log('Found provider:', provider.id.toB58String())
+                        node.dialProtocol(provider, '/dht-protocol', (err, conn) => {
+                            if (err) {
+                                return console.log(err)
+                            }
+                            console.log('nodeA dialed to nodeB on protocol')
+
+                            pull(pull.values(['This information is sent out encrypted to the other peer']), conn)
+
+                            // Sink, data converted from buffer to utf8 string
+                            pull(
+                                conn,
+                                pull.map((data) => {
+                                    return data.toString('utf8').replace('\n', '')
+                                }),
+                                pull.drain(console.log)
+                            )
+                        })
                     });
                 }
 

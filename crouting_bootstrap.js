@@ -12,26 +12,52 @@ const CID = require('cids')
 const KadDHT = require('libp2p-kad-dht')
 const Railing = require('libp2p-railing')
 const pull = require('pull-stream')
+const MulticastDNS = require('libp2p-mdns')
+const defaultsDeep = require('@nodeutils/defaults-deep')
+// const PeerInfo = require('peer-info')
 
 const waterfall = require('async/waterfall')
 const parallel = require('async/parallel')
 
 class MyBundle extends libp2p {
-    constructor(peerInfo) {
-        const modules = {
-            transport: [new TCP(),
-                new WS()
-            ],
-            connection: {
-                muxer: [Mplex],
-                crypto: [SECIO]
+    constructor(_options) {
+        const defaults = {
+            modules: {
+                transport: [TCP,
+                    new WS()
+                ],
+                streamMuxer: [Mplex],
+                connEncryption: [SECIO],
+                peerDiscovery: [MulticastDNS],
+                // we add the DHT module that will enable Peer and Content Routing
+                dht: KadDHT
             },
-            // we add the DHT module that will enable Peer and Content Routing
-            DHT: KadDHT
+            config: {
+                dht: {
+                    kBucketSize: 20
+                },
+                EXPERIMENTAL: {
+                    dht: true
+                },
+                peerDiscovery: {
+                    mdns: { // mdns options
+                        interval: 1000, // ms
+                        enabled: true
+                    },
+                    // bootstrap: {
+                    //     interval: 2000,
+                    //     enabled: true,
+                    //     list: bootstrapers
+                    // }
+                }
+            }
         }
-        super(modules, peerInfo)
+
+        super(defaultsDeep(_options, defaults))
     }
 }
+let node
+
 
 PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
     if (err) {
@@ -40,22 +66,29 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
     const peerListener = new PeerInfo(idListener)
     peerListener.multiaddrs.add('/ip4/0.0.0.0/tcp/10333')
     peerListener.multiaddrs.add('/ip4/0.0.0.0/tcp/10334/ws')
-    const nodeListener = new MyBundle(peerListener)
 
-    nodeListener.start((err) => {
+    node = new MyBundle({
+        peerInfo: peerListener
+    })
+
+    node.start((err) => {
         if (err) {
             throw err
         }
 
-        nodeListener.switch.on('peer-mux-established', (peerInfo) => {
-            console.log(peerInfo.id.toB58String())
-        })
+        // node.switch.on('peer-mux-established', (peerInfo) => {
+        //     console.log(peerInfo.id.toB58String())
+        // })
 
-        nodeListener.handle('/a-protocol', (protocol, conn) => {
+        node.handle('/dht-protocol', (protocol, conn) => {
+            pull(pull.values(['Request received. Hello there']), conn)
+
             pull(
                 conn,
-                pull.map((v) => v.toString()),
-                pull.log()
+                pull.map((data) => {
+                    return data.toString('utf8').replace('\n', '')
+                }),
+                pull.drain(console.log)
             )
         })
 
@@ -67,22 +100,50 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
         // const cid = new CID(address)
         const cid = new CID("QmXGXccwT97aYp11PE3sGxDDmABWTDER1hn32dJauRSvfw")
 
-        nodeListener.contentRouting.provide(cid, (err) => {
+        node.contentRouting.provide(cid, (err) => {
             if (err) {
                 throw err
             }
-            console.log('Node %s is providing %s', nodeListener.peerInfo.id.toB58String(), cid.toBaseEncodedString())
+            console.log('Node %s is providing %s', node.peerInfo.id.toB58String(), cid.toBaseEncodedString())
 
-            nodeListener.contentRouting.findProviders(cid, 5000, (err, providers) => {
-                if (err) {
-                    throw err
-                }
-                if (providers) {
-                    // console.log('Found provider:', providers[0].id.toB58String())
-                    console.log('Found provider:', providers)
-                }
-            })
+            // setInterval(() => {
+            //     node.contentRouting.findProviders(cid, 5000, (err, providers) => {
+            //         if (err) {
+            //             throw err
+            //         }
+            //         if (providers.length != 0) {
+            //             providers.forEach(provider => {
+            //                 if (provider.id.toB58String() !== node.peerInfo.id.toB58String())
+            //                     console.log('Found provider:', provider.id.toB58String())
+            //                 node.dialProtocol(provider, '/dht-protocol', (err, conn) => {
+            //                     if (err) {
+            //                         return console.log(err)
+            //                     }
+            //                     console.log('nodeA dialed to nodeB on protocol')
+
+            //                     pull(pull.values(['This information is sent out encrypted to the other peer']), conn)
+
+            //                     // Sink, data converted from buffer to utf8 string
+            //                     pull(
+            //                         conn,
+            //                         pull.map((data) => {
+            //                             return data.toString('utf8').replace('\n', '')
+            //                         }),
+            //                         pull.drain(console.log)
+            //                     )
+            //                 })
+            //             });
+            //         }
+
+            //     })
+            // }, 3000)
         })
+
+        node.on('peer:connect', (peerInfo) => {
+            console.log(peerInfo.id.toB58String())
+        })
+
+
 
         console.log('Listener ready, listening on:')
         peerListener.multiaddrs.forEach((ma) => {
