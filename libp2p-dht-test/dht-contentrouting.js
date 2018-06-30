@@ -34,7 +34,7 @@ class MyBundle extends libp2p {
                     new WS()
                 ],
                 streamMuxer: [SPDY, Mplex],
-                connEncryption: [SECIO],
+                // connEncryption: [SECIO],
                 peerDiscovery: [Bootstrap, MulticastDNS],
                 // we add the DHT module that will enable Peer and Content Routing
                 dht: KadDHT
@@ -57,13 +57,13 @@ class MyBundle extends libp2p {
                         list: bootstrapers
                     }
                 },
-                relay: {                      // Circuit Relay options
+                relay: { // Circuit Relay options
                     enabled: true,
                     hop: {
-                      enabled: true,
-                      active: true
+                        enabled: true,
+                        active: true
                     }
-                  }
+                }
             }
         }
 
@@ -128,7 +128,7 @@ createNode((err, node) => {
 
     node.contentRouting.provide(cid, (err) => {
         if (err) {
-            throw err
+            return console.log(err)
         }
 
         console.log('Node %s is providing %s', node.peerInfo.id.toB58String(), cid.toBaseEncodedString())
@@ -136,7 +136,7 @@ createNode((err, node) => {
         setInterval(() => {
             node.contentRouting.findProviders(cid, 5000, (err, providers) => {
                 if (err) {
-                    throw err
+                    return console.log(err)
                 }
                 console.log("No providers.")
                 if (providers.length != 0) {
