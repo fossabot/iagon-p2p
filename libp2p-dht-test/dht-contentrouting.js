@@ -15,10 +15,11 @@ const WS = require('libp2p-websockets')
 const MulticastDNS = require('libp2p-mdns')
 const SPDY = require('libp2p-spdy')
 const multiaddr = require('multiaddr')
+const WebRTCStar = require('libp2p-webrtc-star')
 
 const bootstrapers = [
     '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm',
-    '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
+    // '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
     // '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
     // '/ip4/104.236.179.241/tcp/4001/ipfs/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM',
     // '/ip4/162.243.248.213/tcp/4001/ipfs/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm',
@@ -29,14 +30,22 @@ const Pushable = require('pull-pushable')
 const p = Pushable()
 class MyBundle extends libp2p {
     constructor(_options) {
+        const wrtcStar = new WebRTCStar({
+            id: _options.peerInfo.id
+        })
+
         const defaults = {
             modules: {
                 transport: [TCP,
-                    // new WS()
+                    new WS()
                 ],
                 streamMuxer: [SPDY, Mplex],
                 connEncryption: [SECIO],
-                peerDiscovery: [Bootstrap],
+                peerDiscovery: [
+                    MulticastDNS,
+                    wrtcStar.discovery,
+                    Bootstrap
+                ],
                 // we add the DHT module that will enable Peer and Content Routing
                 dht: KadDHT
             },
@@ -56,7 +65,10 @@ class MyBundle extends libp2p {
                         interval: 2000,
                         enabled: true,
                         list: bootstrapers
-                    }
+                    },
+                    webRTCStar: {
+                        enabled: true
+                    },
                 },
                 relay: { // Circuit Relay options
                     enabled: true,
@@ -81,9 +93,11 @@ function createNode(callback) {
         (cb) => PeerInfo.create(cb),
         (peerInfo, cb) => {
             peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/10335')
-            // peerInfo.multiaddrs.add('/ip4/127.0.0.1/tcp/10336/ws')
-            // const ma = `/dns4/star-signal.cloud.ipfs.team/tcp/443/wss/p2p-webrtc-star/ipfs/${peerIdStr}`
-            // peerInfo.multiaddrs.add(ma)
+            peerInfo.multiaddrs.add('/ip4/127.0.0.1/tcp/10336/ws')
+            const peerIdStr = peerInfo.id.toB58String()
+            const ma = `/dns4/52.207.244.0/tcp/9090/wss/p2p-webrtc-star/ipfs/${peerIdStr}`
+            // "/ip4/52.207.244.0/tcp/9090/ws/p2p-webrtc-star/",
+            peerInfo.multiaddrs.add(ma)
             node = new MyBundle({
                 peerInfo
             })
