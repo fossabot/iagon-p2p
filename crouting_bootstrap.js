@@ -49,7 +49,15 @@ class MyBundle extends libp2p {
                     //     enabled: true,
                     //     list: bootstrapers
                     // }
+                },
+                relay: { // Circuit Relay options
+                    enabled: true,
+                    hop: {
+                        enabled: true,
+                        active: true
+                    }
                 }
+
             }
         }
 

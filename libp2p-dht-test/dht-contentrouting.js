@@ -17,11 +17,11 @@ const SPDY = require('libp2p-spdy')
 
 const bootstrapers = [
     '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm',
-    '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
-    '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
-    '/ip4/104.236.179.241/tcp/4001/ipfs/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM',
-    '/ip4/162.243.248.213/tcp/4001/ipfs/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm',
-    '/ip4/128.199.219.111/tcp/4001/ipfs/QmSoLSafTMBsPKadTEgaXctDQVcqN88CNLHXMkTNwMKPnu',
+    // '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
+    // '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
+    // '/ip4/104.236.179.241/tcp/4001/ipfs/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM',
+    // '/ip4/162.243.248.213/tcp/4001/ipfs/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm',
+    // '/ip4/128.199.219.111/tcp/4001/ipfs/QmSoLSafTMBsPKadTEgaXctDQVcqN88CNLHXMkTNwMKPnu',
 ]
 const pull = require('pull-stream')
 const Pushable = require('pull-pushable')
@@ -34,7 +34,7 @@ class MyBundle extends libp2p {
                     new WS()
                 ],
                 streamMuxer: [SPDY, Mplex],
-                // connEncryption: [SECIO],
+                connEncryption: [SECIO],
                 peerDiscovery: [Bootstrap, MulticastDNS],
                 // we add the DHT module that will enable Peer and Content Routing
                 dht: KadDHT
@@ -57,13 +57,13 @@ class MyBundle extends libp2p {
                         list: bootstrapers
                     }
                 },
-                relay: { // Circuit Relay options
+                relay: {                      // Circuit Relay options
                     enabled: true,
                     hop: {
-                        enabled: true,
-                        active: true
+                      enabled: true,
+                      active: true
                     }
-                }
+                  }
             }
         }
 
@@ -101,7 +101,7 @@ createNode((err, node) => {
     // console.log(node)
     console.log('Listener ready, listening on:')
     node.peerInfo.multiaddrs.forEach((ma) => {
-        console.log(ma.toString() + '/ipfs/' + node.peerInfo.id.toB58String())
+        console.log(ma.toString())
     })
     node.on('peer:discovery', (peer) => {
         // console.log('Discovered:', peer.id.toB58String())
@@ -124,7 +124,10 @@ createNode((err, node) => {
 
         // console.log('Connection established to:', peer.id.toB58String())
     })
-    const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL')
+    // const cid = new CID('QmTp9VkYvnHyrqKQuFPiuZkiX9gPcqj6x5LJ1rmWuSySnL') //default
+    // const cid = new CID("QmXGXccwT97aYp11PE3sGxDDmABWTDER1hn32dJauRSvfw") //T2.medium
+
+    const cid = new CID('QmS7F83ss6r6acbPsKry2MKxrQqge9fesPhZKnGMJypzFY') //T2.small
 
     node.contentRouting.provide(cid, (err) => {
         if (err) {
@@ -165,7 +168,7 @@ createNode((err, node) => {
                 }
 
             })
-        }, 3000)
+        }, 5000)
     })
 
 })
