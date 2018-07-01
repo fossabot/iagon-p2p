@@ -14,10 +14,11 @@ const Bootstrap = require('libp2p-railing')
 const WS = require('libp2p-websockets')
 const MulticastDNS = require('libp2p-mdns')
 const SPDY = require('libp2p-spdy')
+const multiaddr = require('multiaddr')
 
 const bootstrapers = [
     '/ip4/52.207.244.0/tcp/10333/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm',
-    // '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
+    '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
     // '/ip4/104.236.176.52/tcp/4001/ipfs/QmSoLnSGccFuZQJzRadHn95W2CrSFmZuTdDWP8HXaHca9z',
     // '/ip4/104.236.179.241/tcp/4001/ipfs/QmSoLPppuBtQSGwKDZT2M73ULpjvfd3aZ6ha4oFGL1KrGM',
     // '/ip4/162.243.248.213/tcp/4001/ipfs/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm',
@@ -31,11 +32,11 @@ class MyBundle extends libp2p {
         const defaults = {
             modules: {
                 transport: [TCP,
-                    new WS()
+                    // new WS()
                 ],
                 streamMuxer: [SPDY, Mplex],
                 connEncryption: [SECIO],
-                peerDiscovery: [Bootstrap, MulticastDNS],
+                peerDiscovery: [Bootstrap],
                 // we add the DHT module that will enable Peer and Content Routing
                 dht: KadDHT
             },
@@ -57,13 +58,13 @@ class MyBundle extends libp2p {
                         list: bootstrapers
                     }
                 },
-                relay: {                      // Circuit Relay options
+                relay: { // Circuit Relay options
                     enabled: true,
                     hop: {
-                      enabled: true,
-                      active: true
+                        enabled: true,
+                        active: true
                     }
-                  }
+                }
             }
         }
 
@@ -80,7 +81,7 @@ function createNode(callback) {
         (cb) => PeerInfo.create(cb),
         (peerInfo, cb) => {
             peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/10335')
-            peerInfo.multiaddrs.add('/ip4/127.0.0.1/tcp/10336/ws')
+            // peerInfo.multiaddrs.add('/ip4/127.0.0.1/tcp/10336/ws')
             // const ma = `/dns4/star-signal.cloud.ipfs.team/tcp/443/wss/p2p-webrtc-star/ipfs/${peerIdStr}`
             // peerInfo.multiaddrs.add(ma)
             node = new MyBundle({
@@ -135,6 +136,8 @@ createNode((err, node) => {
         }
 
         console.log('Node %s is providing %s', node.peerInfo.id.toB58String(), cid.toBaseEncodedString())
+
+
 
         setInterval(() => {
             node.contentRouting.findProviders(cid, 5000, (err, providers) => {
