@@ -92,7 +92,7 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
             node.dial(peer, () => {})
         })
         node.on('peer:connect', (peer) => {
-            console.log('Connected to peer:', peer.id.toB58String())
+            // console.log('Connected to peer:', peer.id.toB58String())
         })
 
         node.handle('/dht-protocol', (protocol, conn) => {
@@ -153,11 +153,6 @@ PeerId.createFromJSON(require('./peer-id-listener'), (err, idListener) => {
             //     })
             // }, 3000)
         })
-
-        node.on('peer:connect', (peerInfo) => {
-            console.log(peerInfo.id.toB58String())
-        })
-
 
 
         console.log('Listener ready, listening on:')
